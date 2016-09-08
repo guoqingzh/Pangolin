@@ -28,10 +28,11 @@
 #ifndef PANGOLIN_GLTEXTURECACHE_H
 #define PANGOLIN_GLTEXTURECACHE_H
 
-#include <pangolin/gl.h>
+#include <pangolin/gl/gl.h>
 #include <pangolin/gl/glformattraits.h>
+#include <pangolin/gl/glpixformat.h>
 #include <pangolin/compat/memory.h>
-#include <pangolin/image.h>
+#include <pangolin/image/image.h>
 
 namespace pangolin
 {
@@ -39,16 +40,16 @@ namespace pangolin
 class PANGOLIN_EXPORT TextureCache
 {
 public:
-    static TextureCache& I() {
-        static TextureCache instance;
-        return instance;
-    }
+    static TextureCache& I();
 
-    template<typename T>
-    GlTexture& GlTex(int w, int h)
+    GlTexture& GlTex(GLsizei w, GLsizei h, GLint internal_format, GLint glformat, GLenum gltype)
     {
+        const long key =
+            (((long)internal_format)<<20) ^
+            (((long)glformat)<<10) ^ gltype;
+
         // Lookup texture
-        boostd::shared_ptr<GlTexture>& ptex = texture_map[typeid(T).name()];
+        boostd::shared_ptr<GlTexture>& ptex = texture_map[key];
         if(!ptex) {
             ptex = boostd::shared_ptr<GlTexture>(new GlTexture());
         }
@@ -58,18 +59,27 @@ public:
         if(!tex.tid || tex.width < w || tex.height < h) {
             tex.Reinitialise(
                 std::max(tex.width,w), std::max(tex.height,h),
-                GlFormatTraits<T>::glinternalformat, default_sampling_linear, 0,
-                GlFormatTraits<T>::glformat,
-                GlFormatTraits<T>::gltype
+                internal_format, default_sampling_linear, 0,
+                glformat, gltype
             );
         }
 
         return tex;
     }
 
+    template<typename T>
+    GlTexture& GlTex(GLsizei w, GLsizei h)
+    {
+        return GlTex( w, h,
+            GlFormatTraits<T>::glinternalformat,
+            GlFormatTraits<T>::glformat,
+            GlFormatTraits<T>::gltype
+        );
+    }
+
 protected:
     bool default_sampling_linear;
-    std::map<const char*, boostd::shared_ptr<GlTexture> > texture_map;
+    std::map<long, boostd::shared_ptr<GlTexture> > texture_map;
 
     // Protected constructor
     TextureCache()
@@ -85,6 +95,21 @@ void RenderToViewport(Image<T>& image, bool flipx=false, bool flipy=false)
     GlTexture& tex = TextureCache::I().GlTex<T>(image.w, image.h);
     tex.Upload(image.ptr,0,0, image.w, image.h, GlFormatTraits<T>::glformat, GlFormatTraits<T>::gltype);
     tex.RenderToViewport(Viewport(0,0,image.w, image.h), flipx, flipy);
+}
+
+// This method may dissapear in the future
+inline void RenderToViewport(
+    Image<unsigned char>& image,
+    const pangolin::GlPixFormat& fmt,
+    bool flipx=false, bool flipy=false,
+    bool linear_sampling = true
+) {
+    pangolin::GlTexture& tex = pangolin::TextureCache::I().GlTex((GLsizei)image.w, (GLsizei)image.h, fmt.scalable_internal_format, fmt.glformat, fmt.gltype);
+    tex.Bind();
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, linear_sampling ? GL_LINEAR : GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, linear_sampling ? GL_LINEAR : GL_NEAREST);
+    tex.Upload(image.ptr,0,0, (GLsizei)image.w, (GLsizei)image.h, fmt.glformat, fmt.gltype);
+    tex.RenderToViewport(pangolin::Viewport(0,0,(GLint)image.w, (GLint)image.h), flipx, flipy);
 }
 
 }

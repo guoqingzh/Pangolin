@@ -17,7 +17,7 @@
 
 /// Configured libraries
 #cmakedefine HAVE_CUDA
-#cmakedefine HAVE_CVARS
+#cmakedefine HAVE_PYTHON
 
 #cmakedefine CPP11_NO_BOOST
 #cmakedefine HAVE_EIGEN
@@ -25,13 +25,21 @@
 
 #cmakedefine HAVE_DC1394
 #cmakedefine HAVE_V4L
-#cmakedefine HAVE_FFMPEG
 #cmakedefine HAVE_OPENNI
 #cmakedefine HAVE_OPENNI2
 #cmakedefine HAVE_UVC
 #cmakedefine HAVE_DEPTHSENSE
+#cmakedefine HAVE_TELICAM
+#cmakedefine HAVE_PLEORA
+
+#cmakedefine HAVE_FFMPEG
+#cmakedefine HAVE_FFMPEG_MAX_ANALYZE_DURATION2
+#cmakedefine HAVE_FFMPEG_AVFORMAT_ALLOC_OUTPUT_CONTEXT2
+#cmakedefine HAVE_FFMPEG_AVPIXELFORMAT
 
 #cmakedefine HAVE_GLEW
+#cmakedefine GLEW_STATIC
+
 #cmakedefine HAVE_GLUT
 #cmakedefine HAVE_FREEGLUT
 #cmakedefine HAVE_APPLE_OPENGL_FRAMEWORK
@@ -40,10 +48,10 @@
 #cmakedefine HAVE_GLES_2
 #cmakedefine HAVE_OCULUS
 
-#cmakedefine HAVE_BOOST_GIL
 #cmakedefine HAVE_PNG
 #cmakedefine HAVE_JPEG
 #cmakedefine HAVE_TIFF
+#cmakedefine HAVE_OPENEXR
 
 /// Platform
 #cmakedefine _UNIX_

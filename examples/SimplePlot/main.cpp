@@ -14,14 +14,13 @@ int main( int /*argc*/, char* argv[] )
   std::vector<std::string> labels;
   labels.push_back(std::string("sin(t)"));
   labels.push_back(std::string("cos(t)"));
-  labels.push_back(std::string("tan(t)"));
   labels.push_back(std::string("sin(t)+cos(t)"));
   log.SetLabels(labels);
 
-  const double tinc = 0.01;
+  const float tinc = 0.01f;
 
   // OpenGL 'view' of data. We might have many views of the same data.
-  pangolin::Plotter plotter(&log,0,4*M_PI/tinc,-2,2,M_PI/(4*tinc),0.5);
+  pangolin::Plotter plotter(&log,0.0f,4.0f*(float)M_PI/tinc,-2.0f,2.0f,(float)M_PI/(4.0f*tinc),0.5f);
   plotter.SetBounds(0.0, 1.0, 0.0, 1.0);
   plotter.Track("$i");
 
@@ -34,7 +33,7 @@ int main( int /*argc*/, char* argv[] )
   {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    log.Log(sin(t),cos(t),tan(t),sin(t)+cos(t));
+    log.Log(sin(t),cos(t),sin(t)+cos(t));
     t += tinc;
 
     // Render graph, Swap frames and Process Events
