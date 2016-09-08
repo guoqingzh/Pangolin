@@ -1,8 +1,10 @@
-#find_package(CUDA QUIET)
+find_package(FREEGLUT QUIET)
+find_package(GLUT QUIET)
+find_package(CUDA QUIET)
 find_package(Oculus QUIET)
 
 # All examples depend on Pangolin GUI
-if(BUILD_PANGOLIN_GUI)
+if(BUILD_PANGOLIN_GUI AND (FREEGLUT_FOUND OR GLUT_FOUND OR ANDROID) )
     add_subdirectory(HelloPangolin)
     add_subdirectory(SimpleMultiDisplay)
     add_subdirectory(SimpleDisplayImage)
@@ -34,5 +36,3 @@ if(BUILD_PANGOLIN_GUI)
 #      endif()
     endif()
 endif()
-
-add_subdirectory(SharedMemoryVideoWriter)

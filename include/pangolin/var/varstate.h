@@ -32,15 +32,11 @@
 #include <vector>
 #include <pangolin/platform.h>
 #include <pangolin/var/varvalue.h>
-<<<<<<< HEAD
 #include <pangolin/file_utils.h>
 
 #ifdef HAVE_CVARS
 #include <cvars/CVar.h>
 #endif
-=======
-#include <pangolin/utils/file_utils.h>
->>>>>>> stevenlovegrove/master
 
 namespace pangolin
 {
@@ -71,7 +67,6 @@ class PANGOLIN_EXPORT VarState
 public:
     static VarState& I();
 
-    VarState();
     ~VarState();
 
     void Clear();
@@ -79,22 +74,30 @@ public:
     template<typename T>
     void NotifyNewVar(const std::string& name, VarValue<T>& var )
     {
-        var_adds.push_back(name);
-
         // notify those watching new variables
         for(std::vector<NewVarCallback>::iterator invc = new_var_callbacks.begin(); invc != new_var_callbacks.end(); ++invc) {
             if( StartsWith(name,invc->filter) ) {
                invc->fn( invc->data, name, var, true);
             }
         }
+
+#ifdef HAVE_CVARS
+        // CVars can't save names containing spaces, so map to '_' instead
+        std::string cvar_name = name;
+        std::replace(cvar_name.begin(), cvar_name.end(), ' ', '_');
+
+        // Don't add generic vars that might change type later.
+        if(!var.Meta().generic) {
+            try {
+                CVarUtils::AttachCVar(cvar_name, &var.Get() );
+            }catch(CVarUtils::CVarException) {
+            }
+        }
+#endif
     }
 
     VarValueGeneric*& operator[](const std::string& str)
     {
-        VarStoreContainer::iterator it = vars.find(str);
-        if (it == vars.end()) {
-            vars[str] = nullptr;
-        }
         return vars[str];
     }
 
@@ -103,38 +106,13 @@ public:
         return vars.find(str) != vars.end();
     }
 
-    void FlagVarChanged()
-    {
-        varHasChanged = true;
-    }
-
-    bool VarHasChanged()
-    {
-        const bool has_changed = varHasChanged;
-        varHasChanged = false;
-        return has_changed;
-    }
-
 //protected:
-    typedef std::map<std::string, VarValueGeneric*> VarStoreContainer;
-    typedef std::vector<std::string> VarStoreAdditions;
-
+    typedef std::map<std::string,VarValueGeneric*> VarStoreContainer;
     VarStoreContainer vars;
-    VarStoreAdditions var_adds;
 
     std::vector<NewVarCallback> new_var_callbacks;
     std::vector<GuiVarChangedCallback> gui_var_changed_callbacks;
-
-    bool varHasChanged;
 };
-
-inline bool GuiVarHasChanged() {
-    return VarState::I().VarHasChanged();
-}
-
-inline void FlagVarChanged() {
-    VarState::I().FlagVarChanged();
-}
 
 }
 

@@ -1,13 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 project( Pangolin )
 set(PANGOLIN_VERSION_MAJOR 0)
-<<<<<<< HEAD
 set(PANGOLIN_VERSION_MINOR 2)
 set(VERSION ${PANGOLIN_VERSION_MAJOR}.${PANGOLIN_VERSION_MINOR})
-=======
-set(PANGOLIN_VERSION_MINOR 4)
-set(PANGOLIN_VERSION ${PANGOLIN_VERSION_MAJOR}.${PANGOLIN_VERSION_MINOR})
->>>>>>> stevenlovegrove/master
 
 if(POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW) # MACOSX_RPATH
@@ -16,41 +11,9 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/")
 include( install_package )
 
-# Platform configuration vars
-include(SetPlatformVars)
-
+option( BUILD_SHARED_LIBS "Build Shared Library" ON)
 option( BUILD_EXAMPLES "Build Examples" ON )
 option( CPP11_NO_BOOST "Use c++11 over boost for threading etc." ON )
-<<<<<<< HEAD
-=======
-
-if(_WIN_)
-    option( BUILD_SHARED_LIBS    "Build Shared Library" OFF)
-    option( BUILD_EXTERN_GLEW    "Automatically download, build and compile GLEW" ON)
-    option( BUILD_EXTERN_LIBPNG  "Automatically download, build and compile libpng" ON)
-    option( BUILD_EXTERN_LIBJPEG "Automatically download, build and compile libjpeg" ON)
-    option( MSVC_USE_STATIC_CRT  "Use static C Runtime with MSVC, /MT instead of /MD" ON)
-
-    # Make sure there are no erroneous C Runtime flags
-    list(APPEND FLAG_VARS
-        CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO
-        CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
-    )
-    if(MSVC_USE_STATIC_CRT)
-        foreach(FLAG_VAR ${FLAG_VARS})
-            string(REGEX REPLACE "/MD" "/MT" NEW_FLAGS "${${FLAG_VAR}}")
-            set(${FLAG_VAR} "${NEW_FLAGS}" CACHE STRING "" FORCE)
-        endforeach()
-    else()
-        foreach(FLAG_VAR ${FLAG_VARS})
-            string(REGEX REPLACE "/MT" "/MD" NEW_FLAGS "${${FLAG_VAR}}")
-            set(${FLAG_VAR} "${NEW_FLAGS}" CACHE STRING "" FORCE)
-        endforeach()
-    endif()
-else()
-    option( BUILD_SHARED_LIBS "Build Shared Library" ON)
-endif()
->>>>>>> stevenlovegrove/master
 
 if(CPP11_NO_BOOST AND NOT MSVC)
     set( CMAKE_CXX_FLAGS "-std=c++11 -Wall ${CMAKE_CXX_FLAGS}" )
@@ -68,18 +31,13 @@ if(ANDROID OR IOS)
     endif()
 endif()
 
-if(_OSX_)
-    set(CMAKE_MACOSX_RPATH ON)
-endif()
-
 # Overide with cmake -DCMAKE_BUILD_TYPE=Debug {dir}
-if( NOT CMAKE_BUILD_TYPE AND NOT _WIN_ )
+if( NOT CMAKE_BUILD_TYPE )
    message("Build type not set (defaults to release)")
    message("-DCMAKE_BUILD_TYPE=Debug for debug")
    set( CMAKE_BUILD_TYPE Release )
 endif()
 
-<<<<<<< HEAD
 # Platform configuration vars
 include(SetPlatformVars)
 
@@ -420,9 +378,6 @@ endif()
 
 #######################################################
 ## Create config.h file for inclusion in library
-=======
-string(TOLOWER ${PROJECT_NAME} LIBRARY_NAME)
->>>>>>> stevenlovegrove/master
 
 configure_file(
     "${SRCDIR}/config.h.in"
@@ -457,7 +412,6 @@ install_package(
     LINK_LIBS ${REQUIRED_LIBRARIES}
     )
 
-<<<<<<< HEAD
 
 #######################################################
 ## Add Libraries / Include Directories / Link directories
@@ -501,14 +455,9 @@ set( PANGOLIN_DIR ${CMAKE_CURRENT_BINARY_DIR} )
 set( PANGOLIN_LIBRARIES ${REQUIRED_LIBRARIES} pangolin )
 set( PANGOLIN_INCLUDE_DIRS ${REQUIRED_INCLUDE_DIRS} )
 link_libraries( ${REQUIRED_LIBRARIES} pangolin )
-=======
-add_subdirectory("external")
-add_subdirectory("src")
->>>>>>> stevenlovegrove/master
 
 if(BUILD_EXAMPLES)
   add_subdirectory(examples)
-  add_subdirectory(tools)
 endif()
 
 # make an uninstall target

@@ -85,7 +85,7 @@ template<typename T>
 class Var
 {
 public:
-    static T& Attach(
+    static void Attach(
         const std::string& name, T& variable,
         double min, double max, bool logscale = false
     ) {
@@ -99,10 +99,9 @@ public:
             v = nv;
             InitialiseNewVarMeta<T&>(*nv,name,min,max,1,logscale);
         }
-        return variable;
     }
 
-    static T& Attach(
+    static void Attach(
         const std::string& name, T& variable, bool toggle = false
         ) {
         // Find name in VarStore
@@ -116,7 +115,6 @@ public:
             v = nv;
             InitialiseNewVarMeta<T&>(*nv, name, 0.0, 0.0, toggle);
         }
-        return variable;
     }
 
     ~Var()
@@ -214,18 +212,18 @@ public:
         var->Reset();
     }
 
-    const T& Get() const
+    const T& Get()
     {
         try{
             return var->Get();
         }catch(BadInputException)
         {
-            const_cast<Var<T> *>(this)->Reset();
+            Reset();
             return var->Get();
         }
     }
 
-    operator const T& () const
+    operator const T& ()
     {
         return Get();
     }
@@ -313,8 +311,7 @@ protected:
     }
 
     // Holds reference to stored variable object
-    // N.B. mutable because it is a cached value and Get() is advertised as const.
-    mutable VarValueT<T>* var;
+    VarValueT<T>* var;
 
     // ptr is non-zero if this object owns the object variable (a wrapper)
     VarValueT<T>* ptr;

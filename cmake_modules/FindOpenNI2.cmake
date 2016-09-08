@@ -21,19 +21,14 @@ find_path(OPENNI2_INCLUDE_DIR OpenNI.h
             ${PC_OPENNI_INCLUDEDIR}
             ${PC_OPENNI_INCLUDE_DIRS}
           PATHS
-            "${PROGRAM_FILES}/OpenNI2/Include"
+            "$ENV{PROGRAMFILES}/OpenNI2/Include"
+            "$ENV{PROGRAMW6432}/OpenNI2/Include"
             "${CMAKE_SOURCE_DIR}/../OpenNI2/Include"
             /usr/include
             /usr/local/include
             /user/include
           PATH_SUFFIXES openni2 ni2
 )
-
-if(${CMAKE_CL_64})
-    set(OPENNI_PATH_SUFFIXES lib64 lib)
-else()
-    set(OPENNI_PATH_SUFFIXES lib)
-endif()
 
 #add a hint so that it can find it without the pkg-config
 find_library(OPENNI2_LIBRARY
@@ -42,17 +37,14 @@ find_library(OPENNI2_LIBRARY
                ${PC_OPENNI_LIBDIR}
                ${PC_OPENNI_LIBRARY_DIRS}
              PATHS
-               "${PROGRAM_FILES}/OpenNI2/Redist"
-               "${PROGRAM_FILES}/OpenNI2"
+               "$ENV{PROGRAMFILES}/OpenNI2/Redist"
+               "$ENV{PROGRAMW6432}/OpenNI2/Redist"
+               "$ENV{PROGRAMW6432}/OpenNI2"
                "${CMAKE_SOURCE_DIR}/../OpenNI2/Bin/x64-Release"
                /usr/lib
                /usr/local/lib
                /user/lib
-<<<<<<< HEAD:cmake_modules/FindOpenNI2.cmake
              PATH_SUFFIXES lib lib64 ni2
-=======
-             PATH_SUFFIXES ${OPENNI_PATH_SUFFIXES}
->>>>>>> stevenlovegrove/master:CMakeModules/FindOpenNI2.cmake
 )
 
 set(OPENNI2_INCLUDE_DIRS ${OPENNI2_INCLUDE_DIR})

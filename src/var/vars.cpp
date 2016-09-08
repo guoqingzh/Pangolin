@@ -27,8 +27,7 @@
 
 #include <pangolin/var/varextra.h>
 #include <pangolin/var/varstate.h>
-#include <pangolin/utils/file_utils.h>
-#include <pangolin/utils/picojson.h>
+#include <pangolin/file_utils.h>
 
 #include <iostream>
 #include <fstream>
@@ -44,11 +43,6 @@ VarState& VarState::I() {
     return singleton;
 }
 
-VarState::VarState()
-    : varHasChanged(false)
-{
-}
-
 VarState::~VarState() {
     Clear();
 }
@@ -58,18 +52,6 @@ void VarState::Clear() {
         delete i->second;
     }
     vars.clear();
-    var_adds.clear();
-}
-
-void ProcessHistoricCallbacks(NewVarCallbackFn callback, void* data, const std::string& filter)
-{
-    for (VarState::VarStoreAdditions::const_iterator i = VarState::I().var_adds.begin(); i != VarState::I().var_adds.end(); ++i)
-    {
-        const std::string& name = *i;
-        if (StartsWith(name, filter)) {
-            callback(data, name, *VarState::I()[name], false);
-        }
-    }
 }
 
 void RegisterNewVarCallback(NewVarCallbackFn callback, void* data, const std::string& filter)
@@ -232,88 +214,6 @@ void ParseVarsFile(const string& filename)
         f.close();
     }else{
         cerr << "Unable to open '" << filename << "' for configuration data" << endl;
-    }
-}
-
-PANGOLIN_EXPORT
-void LoadJsonFile(const std::string& filename, const string &prefix)
-{
-    bool some_change = false;
-
-    json::value file_json(json::object_type,true);
-    std::ifstream f(filename);
-    if(f.is_open()) {
-        const std::string err = json::parse(file_json,f);
-        if(err.empty()) {
-            if(file_json.contains("vars") ) {
-                json::value vars = file_json["vars"];
-                if(vars.is<json::object>()) {
-                    for(json::object::iterator
-                        i = vars.get<json::object>().begin();
-                        i!= vars.get<json::object>().end();
-                        ++i)
-                    {
-                        const std::string& name = i->first;
-                        if(pangolin::StartsWith(name, prefix)) {
-                            const std::string& val = i->second.get<std::string>();
-
-                            VarValueGeneric*& v = VarState::I()[name];
-                            if(!v) {
-                                VarValue<std::string>* nv = new VarValue<std::string>(val);
-                                InitialiseNewVarMetaGeneric<std::string>(*nv, name);
-                                v = nv;
-                            }else{
-                                v->str->Set(val);
-                                v->Meta().gui_changed = true;
-                            }
-                            some_change = true;
-                        }
-                    }
-                }
-            }
-        }else{
-            pango_print_error("%s\n", err.c_str());
-        }
-    }else{
-        pango_print_error("Unable to load vars from %s\n", filename.c_str());
-    }
-
-    if(some_change) {
-        FlagVarChanged();
-    }
-}
-
-PANGOLIN_EXPORT
-void SaveJsonFile(const std::string& filename, const string &prefix)
-{
-    json::value vars(json::object_type,true);
-
-    for(VarState::VarStoreAdditions::const_iterator
-        i  = VarState::I().var_adds.begin();
-        i != VarState::I().var_adds.end();
-        ++i)
-    {
-        const std::string& name = *i;
-        if(StartsWith(name,prefix)) {
-            try{
-                const std::string val = VarState::I()[name]->str->Get();
-                vars[name] = val;
-            }catch(BadInputException)
-            {
-                // Ignore things we can't serialise
-            }
-        }
-    }
-
-    json::value file_json(json::object_type,true);
-    file_json["pangolin_version"] = PANGOLIN_VERSION_STRING;
-    file_json["vars"] = vars;
-
-    std::ofstream f(filename);
-    if(f.is_open()) {
-        f << file_json.serialize(true);
-    }else{
-        pango_print_error("Unable to serialise to %s\n", filename.c_str());
     }
 }
 
