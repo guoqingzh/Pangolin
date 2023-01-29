@@ -269,11 +269,12 @@ if(Oculus_FOUND)
   message(STATUS "Oculus Rift Found and Enabled")
 endif()
 
-find_package(Eigen3 QUIET)
+find_package(Eigen3 REQUIRED)
 if(EIGEN3_FOUND)
   set(HAVE_EIGEN 1)
   list(APPEND USER_INC  ${EIGEN3_INCLUDE_DIR} )
   message(STATUS "Eigen Found and Enabled")
+  message(STATUS EIGEN3_VERSION)
 endif()
 
 find_package(TooN QUIET)
